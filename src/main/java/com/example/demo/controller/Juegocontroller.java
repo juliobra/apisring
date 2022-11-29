@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping ("/api")
+@CrossOrigin("http://localhost:4200")
 public class Juegocontroller {
 
     @Autowired
@@ -46,13 +48,12 @@ public class Juegocontroller {
                 
     
                 } 
-    //borrar juego
-    @DeleteMapping("/borrar")
-    public ResponseEntity<?> delete (@PathVariable("id")int id){
+    //borrar juego por id
+    @DeleteMapping("/borrar/{id}")
+    public ResponseEntity<?> delete (@PathVariable("id") int id){
     
-        if(juegoserv.existsById(id)){
-        
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if(!juegoserv.existsById(id)){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         juegoserv.delete(id);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -80,18 +81,13 @@ public class Juegocontroller {
     //editar un juego
     @PutMapping("/editar/{id}")
         
-        public ResponseEntity <?> update(@PathVariable ("id") int id , @RequestBody  Juegodto juegodto){
-        if (juegoserv.existsById(id) ){
-        
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            
-        }
-        else if (StringUtils.isBlank(juegodto.getNombre())){
-        
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        
-        else if (juegoserv.existsByNombre(juegodto.getNombre())&& juegoserv.getByNombre(juegodto.getNombre()).get().getId()!=id){
+        public ResponseEntity<?> update(@PathVariable ("id") int id , @RequestBody  Juegodto juegodto){
+        if (!juegoserv.existsById(id)){
+         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (StringUtils.isBlank(juegodto.getNombre())){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }else if (juegoserv.existsByNombre(juegodto.getNombre())
+                && juegoserv.getByNombre(juegodto.getNombre()).get().getId()!= id ) {
               return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
               Juego juego = juegoserv.getById(id).get();
